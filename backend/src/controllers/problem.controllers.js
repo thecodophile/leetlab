@@ -226,6 +226,39 @@ export const updateProblem = async (req, res) => {
   }
 };
 
-export const deleteProblem = async (req, res) => {};
+export const deleteProblem = async (req, res) => {
+  const { id } = req.params;
+
+  // going to check the user role once again
+  if (req.user.role !== "ADMIN") {
+    return res.status(403).json({
+      error: "You are not allowed to delete a problem",
+    });
+  }
+
+  try {
+    const problem = await db.problem.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!problem) {
+      return res.status(404).json({
+        error: "Problem can not found",
+      });
+    }
+
+    await db.problem.delete({ where: { id } });
+
+    res.status(200).json({
+      success: true,
+      message: "Problem deleted successfully",
+    });
+  } catch (error) {
+    console.log("delete problem error ->", error);
+    res.status(400).json({ success: false, error });
+  }
+};
 
 export const getAllProblemsSolvedByUser = async (req, res) => {};
